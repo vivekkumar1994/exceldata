@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Excel to MySQL</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #4CAF50;
+    }
+    form {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input[type="file"] {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #fff;
+      cursor: pointer;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #4CAF50;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #response {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 16px;
+      color: #ff5722;
+    }
+    table {
+      margin: 20px auto;
+      width: 90%;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+      font-size: 14px;
+    }
+    table th {
+      background-color: #4CAF50;
+      color: white;
+    }
+    table tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    table tr:hover {
+      background-color: #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>Upload Excel File to MySQL</h1>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" id="excelFile" name="excelFile" accept=".xlsx" required />
+    <button type="submit">Upload</button>
+  </form>
+  <div id="response"></div>
+  
+  <h2>Uploaded Data</h2>
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>Application ID</th>
+        <th>Applicant Name</th>
+        <th>Father Name</th>
+        <th>Aadhar Card</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th>City</th>
+        <th>State</th>
+        <th>Country</th>
+        <th>ZIP</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Rows will be populated here -->
+    </tbody>
+  </table>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const dataTable = document.getElementById('dataTable').querySelector('tbody');
+
+    // Upload file
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const fileInput = document.getElementById('excelFile');
+      const formData = new FormData();
+      formData.append('excelFile', fileInput.files[0]);
+
+      try {
+        const response = await fetch('http://127.0.0.1:5001/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const result = await response.json();
+        document.getElementById('response').innerText = result.message;
+
+        // Reload data after successful upload
+        if (response.ok) {
+          loadData();
+        }
+      } catch (error) {
+        console.error(error);
+        document.getElementById('response').innerText = 'Error uploading file.';
+      }
+    });
+
+    // Load data into the table
+    async function loadData() {
+      try {
+        const response = await fetch('http://127.0.0.1:5001/alldata');
+        const data = await response.json();
+
+        // Clear existing rows
+        dataTable.innerHTML = '';
+
+        // Populate table with new data
+        data.data.forEach(row => {
+          const tableRow = document.createElement('tr');
+          tableRow.innerHTML = `
+            <td>${row.applicationid || ''}</td>
+            <td>${row.applicant_name || ''}</td>
+            <td>${row.father_name || ''}</td>
+            <td>${row.aadhar_card || ''}</td>
+            <td>${row.phone || ''}</td>
+            <td>${row.email || ''}</td>
+            <td>${row.city || ''}</td>
+            <td>${row.state || ''}</td>
+            <td>${row.country || ''}</td>
+            <td>${row.zip || ''}</td>
+          `;
+          dataTable.appendChild(tableRow);
+        });
+      } catch (error) {
+        console.error(error);
+        alert('Error fetching data.');
+      }
+    }
+
+    // Automatically load data when the page loads
+    document.addEventListener('DOMContentLoaded', loadData);
+  </script>
+</body>
+</html>

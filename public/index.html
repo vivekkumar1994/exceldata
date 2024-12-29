@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Excel to MySQL</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 50px;
+    }
+    form {
+      margin-bottom: 20px;
+    }
+    input[type="file"] {
+      margin-bottom: 10px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    table th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <h1>Upload Excel File</h1>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" id="excelFile" name="excelFile" accept=".xlsx" required />
+    <button type="submit">Upload</button>
+  </form>
+  <div id="response"></div>
+  
+  <h2>Uploaded Data</h2>
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Age</th>
+        <th>Email</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Rows will be populated here -->
+    </tbody>
+  </table>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const dataTable = document.getElementById('dataTable').querySelector('tbody');
+
+    // Upload file
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const fileInput = document.getElementById('excelFile');
+      const formData = new FormData();
+      formData.append('excelFile', fileInput.files[0]);
+
+      try {
+        const response = await fetch('http://127.0.0.1:5001/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const result = await response.json();
+        document.getElementById('response').innerText = result.message;
+
+        // Reload data after successful upload
+        if (response.ok) {
+          loadData();
+        }
+      } catch (error) {
+        console.error(error);
+        document.getElementById('response').innerText = 'Error uploading file.';
+      }
+    });
+
+    // Load data into the table
+    async function loadData() {
+      try {
+        const response = await fetch('http://127.0.0.1:5001/alldata');
+        const data = await response.json();
+
+        // Clear existing rows
+        dataTable.innerHTML = '';
+
+        // Populate table with new data
+        data.data.forEach(row => {
+          const tableRow = document.createElement('tr');
+          tableRow.innerHTML = `
+            <td>${row.id}</td>
+            <td>${row.name}</td>
+            <td>${row.age}</td>
+            <td>${row.email}</td>
+          `;
+          dataTable.appendChild(tableRow);
+        });
+      } catch (error) {
+        console.error(error);
+        alert('Error fetching data.');
+      }
+    }
+
+    // Automatically load data when the page loads
+    document.addEventListener('DOMContentLoaded', loadData);
+  </script>
+</body>
+</html>
