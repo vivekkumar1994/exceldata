@@ -6,32 +6,76 @@
   <title>Upload Excel to MySQL</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 50px;
+      font-family: 'Arial', sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #4CAF50;
     }
     form {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
       margin-bottom: 20px;
     }
     input[type="file"] {
-      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #fff;
+      cursor: pointer;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #4CAF50;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #response {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 16px;
+      color: #ff5722;
     }
     table {
+      margin: 20px auto;
+      width: 90%;
       border-collapse: collapse;
-      width: 100%;
-      margin-top: 20px;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
     table th, table td {
       border: 1px solid #ddd;
-      padding: 8px;
+      padding: 12px;
       text-align: left;
+      font-size: 14px;
     }
     table th {
+      background-color: #4CAF50;
+      color: white;
+    }
+    table tr:nth-child(even) {
       background-color: #f2f2f2;
+    }
+    table tr:hover {
+      background-color: #ddd;
     }
   </style>
 </head>
 <body>
-  <h1>Upload Excel File</h1>
+  <h1>Upload Excel File to MySQL</h1>
   <form id="uploadForm" enctype="multipart/form-data">
     <input type="file" id="excelFile" name="excelFile" accept=".xlsx" required />
     <button type="submit">Upload</button>
@@ -42,10 +86,16 @@
   <table id="dataTable">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Age</th>
+        <th>Application ID</th>
+        <th>Applicant Name</th>
+        <th>Father Name</th>
+        <th>Aadhar Card</th>
+        <th>Phone</th>
         <th>Email</th>
+        <th>City</th>
+        <th>State</th>
+        <th>Country</th>
+        <th>ZIP</th>
       </tr>
     </thead>
     <tbody>
@@ -66,7 +116,7 @@
       formData.append('excelFile', fileInput.files[0]);
 
       try {
-        const response = await fetch('http://127.0.0.1:5001/upload', {
+        const response = await fetch('https://exceldata-48xl.onrender.com/upload', {
           method: 'POST',
           body: formData,
         });
@@ -86,7 +136,7 @@
     // Load data into the table
     async function loadData() {
       try {
-        const response = await fetch('http://127.0.0.1:5001/alldata');
+        const response = await fetch('https://exceldata-48xl.onrender.com/alldata');
         const data = await response.json();
 
         // Clear existing rows
@@ -96,10 +146,16 @@
         data.data.forEach(row => {
           const tableRow = document.createElement('tr');
           tableRow.innerHTML = `
-            <td>${row.id}</td>
-            <td>${row.name}</td>
-            <td>${row.age}</td>
-            <td>${row.email}</td>
+            <td>${row.applicationid || ''}</td>
+            <td>${row.applicant_name || ''}</td>
+            <td>${row.father_name || ''}</td>
+            <td>${row.aadhar_card || ''}</td>
+            <td>${row.phone || ''}</td>
+            <td>${row.email || ''}</td>
+            <td>${row.city || ''}</td>
+            <td>${row.state || ''}</td>
+            <td>${row.country || ''}</td>
+            <td>${row.zip || ''}</td>
           `;
           dataTable.appendChild(tableRow);
         });

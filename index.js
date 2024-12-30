@@ -24,7 +24,7 @@ db.connect((err) => {
 
 // Ensure Table with 'country' field and 'applicationid' as UNIQUE
 const createTable = `
-CREATE TABLE IF NOT EXISTS excelupload (
+CREATE TABLE IF NOT EXISTS exceluploads (
   id INT AUTO_INCREMENT PRIMARY KEY,
   applicationid VARCHAR(255) UNIQUE,  -- applicationid set as unique
   applicant_name VARCHAR(255),
@@ -74,7 +74,7 @@ app.post('/upload', upload.single('excelFile'), (req, res) => {
     ]);
 
     // Insert Query
-    const insertQuery = `INSERT INTO excelupload(applicationid, applicant_name, father_name, aadhar_card, phone, email, city, state, zip, country) VALUES ? ON DUPLICATE KEY UPDATE applicationid=applicationid`;
+    const insertQuery = `INSERT INTO exceluploads(applicationid, applicant_name, father_name, aadhar_card, phone, email, city, state, zip, country) VALUES ? ON DUPLICATE KEY UPDATE applicationid=applicationid`;
     db.query(insertQuery, [values], (err) => {
       if (err) throw err;
       res.status(200).json({ message: "Data inserted successfully" });
@@ -87,7 +87,7 @@ app.post('/upload', upload.single('excelFile'), (req, res) => {
 
 // Fetch All Data
 app.get("/alldata", (req, res) => {
-  const fetchQuery = `SELECT * FROM excelupload`;
+  const fetchQuery = `SELECT * FROM exceluploads`;
   db.query(fetchQuery, (err, results) => {
     if (err) {
       console.error(err);
